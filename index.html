@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: #0078d7;
+            color: #fff;
+            padding: 1em 0;
+            text-align: center;
+        }
+        .container {
+            padding: 1em;
+        }
+        .workout-day {
+            margin: 1em 0;
+            padding: 1em;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1em;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 0.5em;
+            text-align: center;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 0.5em;
+            margin: 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .save-button {
+            background: #0078d7;
+            color: #fff;
+            padding: 0.5em 1em;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .save-button:hover {
+            background: #005cbf;
+        }
+        .upload-container {
+            margin: 1em 0;
+            padding: 1em;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Workout Tracker</h1>
+    </header>
+    <div class="container">
+        <div class="upload-container">
+            <h2>Upload Workout Schedule</h2>
+            <input type="file" id="fileInput" accept="application/json">
+        </div>
+        <div id="workoutContainer"></div>
+    </div>
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const schedule = JSON.parse(e.target.result);
+                        displaySchedule(schedule);
+                    } catch (err) {
+                        alert('Invalid JSON format. Please upload a valid workout schedule.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function displaySchedule(schedule) {
+            const container = document.getElementById('workoutContainer');
+            container.innerHTML = '';
+
+            if (schedule && schedule.schedule) {
+                schedule.schedule.forEach(day => {
+                    const dayDiv = document.createElement('div');
+                    dayDiv.className = 'workout-day';
+
+                    const dayTitle = document.createElement('h2');
+                    dayTitle.textContent = `${day.day}: ${day.title}`;
+                    dayDiv.appendChild(dayTitle);
+
+                    const table = document.createElement('table');
+
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr>
+                            <th>Exercise</th>
+                            <th>Sets</th>
+                            <th>Reps</th>
+                            <th>Weight (kg)</th>
+                        </tr>
+                    `;
+                    table.appendChild(thead);
+
+                    const tbody = document.createElement('tbody');
+                    day.exercises.forEach(exercise => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${exercise.name}</td>
+                            <td>${exercise.sets}</td>
+                            <td>${exercise.reps}</td>
+                            <td><input type="number" placeholder="Enter weight"></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+
+                    table.appendChild(tbody);
+                    dayDiv.appendChild(table);
+
+                    const saveButton = document.createElement('button');
+                    saveButton.className = 'save-button';
+                    saveButton.textContent = 'Save Workout';
+                    saveButton.addEventListener('click', () => {
+                        alert(`Workout for ${day.day} saved!`);
+                    });
+                    dayDiv.appendChild(saveButton);
+
+                    container.appendChild(dayDiv);
+                });
+            } else {
+                alert('Invalid schedule format. Please ensure the uploaded file has the correct structure.');
+            }
+        }
+    </script>
+</body>
+</html>
